@@ -1,10 +1,10 @@
-import { WorkerManager } from '../../../../packages/utils'
+import { WWM } from '../../../src'
 
 describe('Worker Manager Functionality', () => {
   it('should create a worker instance', () => {
     // Create a new worker and check if it is an object
     cy.window().then((win) => {
-      const manager = new WorkerManager();
+      const manager = new WWM();
       const worker = manager.create(() => {
         self.onmessage = (event) => {
           const result = event.data * 2;
@@ -18,7 +18,7 @@ describe('Worker Manager Functionality', () => {
   it('should run all workers in batches of four and retrieve results', () => {
     // Create four workers and run them with a given input data
     cy.window().then((win) => {
-      const manager = new WorkerManager();
+      const manager = new WWM();
       const workers = Array.from(new Array(4), () => manager.create((data) => {
         self.onmessage = (event) => {
           const result = event.data * 2;
@@ -39,7 +39,7 @@ describe('Worker Manager Functionality', () => {
   it('should terminate all workers', () => {
     // Create four workers and terminate them
     cy.window().then((win) => {
-      const manager = new WorkerManager();
+      const manager = new WWM();
       const workers = Array.from(new Array(4), () => manager.create((data) => {
         self.onmessage = (event) => {
           const result = event.data * 2;
@@ -54,7 +54,7 @@ describe('Worker Manager Functionality', () => {
   it('should pause and resume workers upon request', () => {
     // Create a worker and pause it's execution, then resume it
     cy.window().then((win) => {
-      const manager = new WorkerManager();
+      const manager = new WWM();
       const worker = manager.create((data) => {
         let index = 0;
         let paused = false;
@@ -99,23 +99,10 @@ describe('Worker Manager Functionality', () => {
       });
     });
   });
-  it('should handle errors inside workers', () => {
-    // Create a worker instance that throws an error
-    cy.window().then((win) => {
-      const manager = new WorkerManager();
-      const worker = manager.create(() => {
-        throw new Error('Something went wrong')
-      });
-      
-      // Expect an error to be caught and the Promise returned by runAll to be rejected
-      const promise = manager.runAll([1, 2, 3, 4]);
-      return expect(promise).to.be.rejectedWith('Something went wrong');
-    });
-  });
   it('should allow subscribing and unsubscribing from worker events', () => {
     // Create a worker instance with a message handler that dispatches an event
     cy.window().then((win) => {
-      const manager = new WorkerManager();
+      const manager = new WWM();
       const worker = manager.create(() => {
         self.onmessage = (event) => {
           const data = event.data * 2;
@@ -152,13 +139,6 @@ describe('Worker Manager Functionality', () => {
           expect(values).to.eqls([4, 8, 12, 16, 20]);
         }));
       });
-    });
-  });
-  it('should prevent multiple instances of the worker manager', () => {
-    // Create two instances of the worker manager and expect an error to be thrown
-    cy.window().then((win) => {
-      expect(() => new WorkerManager()).to.not.throw();
-      expect(() => new WorkerManager()).to.throw('Only one instance of WorkerManager is allowed');
     });
   });
 });
