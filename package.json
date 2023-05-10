@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "description": "",
   "files": [
-    "bundlers/wwm.js"
+    "bundlers/wwmjs.cjs.js",
+    "bundlers/wwmjs.esm.js"
   ],
   "scripts": {
     "build": "node scripts/build.js",

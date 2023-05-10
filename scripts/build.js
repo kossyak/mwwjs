@@ -37,7 +37,6 @@ function buildCDN(name) {
     bundle: true,
     platform: 'browser',
     define: { CDN: 'true'},
-    minify: true
   }).then(() => {
     outputSize(name)
   })
