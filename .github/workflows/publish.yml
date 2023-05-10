@@ -16,8 +16,8 @@ jobs:
           node-version: 18
       - run: npm install
       - run: |
-          git config --global user.name kossyak
-          git config --global user.email akosyak@protonmail.com
+          git config user.name "kossyak"
+          git config user.email "akosyak@protonmail.com"
           npm version ${{ github.event.inputs.version }}
           git push origin main
           git push origin v${{ github.event.inputs.version }}
