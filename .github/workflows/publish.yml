@@ -18,9 +18,10 @@ jobs:
       - run: npm install
       - run: npm run test
       - run: |
+          git status
           npm version ${{ github.event.inputs.version }}
           git push origin main
-          git push origin ${{ github.event.inputs.version }}
+          git push origin v${{ github.event.inputs.version }}
       - run: npm run build
       - run: npm publish
     env:
