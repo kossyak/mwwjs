@@ -1,6 +1,6 @@
 {
   "name": "wwmjs",
-  "version": "0.0.1",
+  "version": "0.0.1-alpha",
   "description": "",
   "files": [
     "bundlers/wwmjs.cjs.js",
