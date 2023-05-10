@@ -17,12 +17,11 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: npm install
       - run: npm run test
+      - run: npm run build
       - run: |
-          git status
           npm version ${{ github.event.inputs.version }}
           git push origin main
           git push origin v${{ github.event.inputs.version }}
-      - run: npm run build
       - run: npm publish
     env:
       NODE_AUTH_TOKEN: ${{ secrets.npm_token_wwm }}
