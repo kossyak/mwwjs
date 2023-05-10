@@ -13,18 +13,16 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 16
           registry-url: https://registry.npmjs.org/
       - run: npm install
       - run: npm run test
       - run: npm run build
       - run: |
-          git config user.name kossyak
-          git config user.email akosyak@protonmail.com
-          git add . && git commit -am new_version
+          git status
           npm version ${{ github.event.inputs.version }}
           git push origin main
           git push origin v${{ github.event.inputs.version }}
       - run: npm publish
     env:
-      NODE_AUTH_TOKEN: ${{ secrets.npm_token_wwm }}
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_WWM }}
