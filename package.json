@@ -1,0 +1,22 @@
+{
+  "name": "wwm",
+  "version": "0.0.1",
+  "description": "",
+  "files": [
+    "bundlers/wwm.js"
+  ],
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "cypress run",
+    "cypress": "cypress open"
+  },
+  "author": "kossyak",
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "^7.0.0",
+    "esbuild": "~0.16.17",
+    "path": "^0.12.7",
+    "zlib": "^1.0.5"
+  },
+  "type": "module"
+}

@@ -1,0 +1,104 @@
+class WWM {
+  constructor(options) {
+    this.workers = []
+    this.max = 4
+    this.count = 0
+    this.options = options || { type: 'classic' }
+  }
+  create(fn, scripts) {
+    const worker = this.createWorker(fn, scripts)
+    this.workers.push(worker)
+    return worker
+  }
+  terminateAll() {
+    this.workers.forEach(worker => worker.terminate())
+    this.workers.length = 0
+  }
+  list() {
+    return this.workers
+  }
+  async runAll(data) {
+    const results = []
+    let index = 0
+    while (index < this.workers.length) {
+      const nextBatch = Math.min(this.workers.length - index, this.max - this.count)
+      const promises = this.workers.slice(index, index + nextBatch).map(worker => worker.run(data).finally(() => {
+        this.count--
+      }))
+      this.count += nextBatch
+      index += nextBatch
+      const result = await Promise.all(promises)
+      results.push(...result)
+    }
+    return results
+  }
+  createWorker(fn, scripts = []) {
+    const state = {
+      status: 'init',
+      progress: 0,
+      result: null,
+      error: null,
+    }
+    const scriptURLs = scripts.map(script => URL.createObjectURL(new Blob([`self.${script.name}=${script.value.toString()};`])))
+    const blob = new Blob([...scriptURLs, `self.onmessage=${fn.toString()};`], {type: 'text/javascript'})
+    const url = URL.createObjectURL(blob)
+    const worker = new Worker(url, this.options)
+    let paused = false
+    const pauseQueue = []
+    const onmessage = worker.onmessage || (() => {})
+    worker.onmessage = (event) => paused ? pauseQueue.push(event) : onmessage(event)
+    const api = {
+      _shell: worker,
+      run: data => this.run(worker, data),
+      terminate: () => this.terminate(api),
+      subscribe: fn => worker.addEventListener('message', fn),
+      unsubscribe: fn => worker.removeEventListener('message', fn),
+      importScripts: (...scripts) => {
+        const scriptURLs = scripts.map(script => URL.createObjectURL(new Blob([script])))
+        worker.postMessage({ type: 'importScripts', data: scriptURLs })
+      },
+      getState: () => Object.assign({}, state),
+      pause: () => paused = true,
+      play: () => {
+        paused = false
+        if (pauseQueue.length > 0) onmessage(pauseQueue.shift())
+      }
+    }
+    return api
+  }
+  postMessageAll(message, transfer) {
+    this.workers.forEach(worker => {
+      worker._shell.postMessage(message, transfer)
+    })
+  }
+  run(worker, data) {
+    return new Promise((resolve, reject) => {
+      // Update worker status to "running"
+      const state = worker.getState()
+      state.status = 'running'
+      worker.setState(state)
+      worker.onerror = event => {
+        const state = worker.getState()
+        state.error = event.message
+        state.status = 'error'
+        worker.setState(state)
+        reject(event)
+      }
+      worker.onmessage = event => {
+        const state = worker.getState()
+        state.result = event.data
+        state.status = 'finished'
+        worker.setState(state)
+        resolve(event)
+      }
+      worker.postMessage(data ||= {})
+    })
+  }
+  terminate(api) {
+    const index = this.workers.indexOf(api)
+    if (index !== -1) this.workers.splice(index, 1)
+    api._shell.terminate()
+  }
+}
+
+export { WWM }
