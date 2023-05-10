@@ -18,9 +18,13 @@ jobs:
       - run: npm install
       - run: npm run test
       - run: npm run build
-      - run: npm version ${{ github.event.inputs.version }}
-      - run: git push origin main
-      - run: git push origin v${{ github.event.inputs.version }}
+      - run: |
+          git config user.name kossyak
+          git config user.email akosyak@protonmail.com
+          git add . && git commit -am new_version
+          npm version ${{ github.event.inputs.version }}
+          git push origin main
+          git push origin v${{ github.event.inputs.version }}
       - run: npm publish
     env:
       NODE_AUTH_TOKEN: ${{ secrets.npm_token_wwm }}
