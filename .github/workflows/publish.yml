@@ -19,7 +19,9 @@ jobs:
       - run: npm run test
       - run: npm run build
       - run: |
-          git reset --hard HEAD
+          git config --global user.email akosyak@protonmail.com
+          git config --global user.name kossyak
+          git checkout -- package-lock.json
           git status
           npm version ${{ github.event.inputs.version }}
           git push origin main
